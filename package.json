@@ -4,6 +4,7 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
+    "build": "prisma generate && tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc && nodemon dist/app.js",
     "start": "node dist/app.js"
