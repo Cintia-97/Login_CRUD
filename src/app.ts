@@ -6,6 +6,7 @@ import { testConnection } from './services/postgresService.js';
 import dotenv from "dotenv";
 import session from 'express-session';
 import { isAuthenticated } from './middlewares/authMiddleware.js';
+import path from 'path';
 
 //Rota esqueci a senha
 import crypto from 'crypto';
@@ -19,6 +20,9 @@ testConnection();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Servir arquivos estáticos da pasta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 
 //Configuração da sessão
 app.use(session({
