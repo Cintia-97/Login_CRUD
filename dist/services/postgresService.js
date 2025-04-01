@@ -39,8 +39,6 @@ export async function verifyAccount(verificationToken, email) {
     const user = await prisma.user.findFirst({
         where: { email, verificationToken },
     });
-    console.log("Email recebido:", email); // Verifique se o email está sendo passado corretamente
-    console.log("Token recebido:", verificationToken);
     // Valida a existência do usuário
     if (!user) {
         throw new Error("Token inválido ou expirado");

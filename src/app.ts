@@ -5,6 +5,7 @@ import validator from 'validator';
 import { testConnection } from './services/postgresService.js';
 import dotenv from "dotenv";
 import session from 'express-session';
+import { isAuthenticated } from './middlewares/authMiddleware.js';
 
 //Rota esqueci a senha
 import crypto from 'crypto';
@@ -18,6 +19,14 @@ testConnection();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+//Configuração da sessão
+app.use(session({
+  secret: 'secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false },
+}));
 
 //Para acessar a pasta public (que contem meu css)
 app.use(express.static('public'));
@@ -327,6 +336,12 @@ app.post('/auth', (async (req: Request, res: Response) => {
   try {
     // Chama a função authenticateUser para buscar e verificar o usuário no banco de dados
     const data = await authenticateUser(email, password);
+
+    // Define o usuário na sessão
+    req.session.user = {
+      name: data.name,
+      email: data.email,
+    };
     
     // Se a autenticação for bem-sucedida, envia uma resposta de boas-vindas
     res.send(`
@@ -335,7 +350,8 @@ app.post('/auth', (async (req: Request, res: Response) => {
       </head>
       <body> 
         <h2>Bem-vindo, ${data.name}!</h2>
-        <a href="/settings">Ir para Configurações</a>
+        <a href="/settings">Ir para Configurações</a><br>
+        <a href="/logout">Sair</a><br>
       </body>
     `);
   } catch (err) {
@@ -347,7 +363,7 @@ app.post('/auth', (async (req: Request, res: Response) => {
 }) as RequestHandler);
 
 //Rota para exibir o formulário para atualizar os dados do usuário
-app.get('/settings', (async (req: Request, res: Response) => {
+app.get('/settings', isAuthenticated, (async (req: Request, res: Response) => {
   res.send(`
     <head>
       <link rel="stylesheet" href="/styles.css">
@@ -445,6 +461,16 @@ app.post('/delete', (async (req: Request, res: Response) => {
     res.status(500).send(error instanceof Error ? error.message : "Erro inesperado ao excluir a conta.");
   }
 }) as RequestHandler);
+
+// Rota de logout
+app.get('/logout', (req: Request, res: Response) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send('Erro ao encerrar a sessão');
+    }
+    res.redirect('/login');
+  });
+});
 
 // Start the express server
 app.listen(port, () => {
