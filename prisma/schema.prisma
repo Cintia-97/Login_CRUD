@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  name       String
-  password   String
-  birthdate  DateTime? 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                Int       @id @default(autoincrement())
+  email             String    @unique
+  name              String
+  password          String
+  birthdate         DateTime? 
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  verificationToken String    // Adicionando o campo como opcional
+  verified          Boolean   @default(false) // Valor padrão como false
 }
-
 
 model passwordResets {
   email      String   @id

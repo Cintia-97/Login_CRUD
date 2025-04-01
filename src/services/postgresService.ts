@@ -14,12 +14,13 @@ export async function testConnection() {
 }
 
 // Criar usuário
-export async function createUser(name: string, email: string, birthdate: string, password: string) {
+export async function createUser(name: string, email: string, birthdate: string, password: string, verificationToken: string) {
   // Verifica se o usuário já existe
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
 
+  //Verifica se o usuário existe no banco
   if (existingUser) {
     throw new Error("E-mail já cadastrado.");
   }
@@ -32,7 +33,32 @@ export async function createUser(name: string, email: string, birthdate: string,
       name,
       email,
       birthdate: new Date(birthdate),
-      password: hashedPassword,  // Armazenando a senha hasheada no banco
+      password: hashedPassword,  // Armazenando a senha hasheada no banco // Agora está sendo salvo corretamente
+      verified: false,
+      verificationToken  // Adiciona um campo para controle
+    },
+  });
+
+}
+
+export async function verifyAccount(verificationToken: string, email:string){
+  // Busca o usuário com o token fornecido
+  const user = await prisma.user.findFirst({
+    where: { email, verificationToken },
+  });
+  console.log("Email recebido:", email);  // Verifique se o email está sendo passado corretamente
+  console.log("Token recebido:", verificationToken);
+  // Valida a existência do usuário
+  if (!user) {
+    throw new Error("Token inválido ou expirado");
+  }
+
+  // Atualiza o usuário para marcar como verificado
+  await prisma.user.update({
+    where: { email: user.email },
+    data: { 
+      verificationToken: undefined, // Remove o token de verificação
+      verified: true // Marca a conta como verificada
     },
   });
 }
@@ -69,6 +95,7 @@ export async function updateUser(email:string, name: string, password: string) {
 export async function deleteUser(email:string) {
   return await prisma.user.delete({ where: { email } });
 }
+
 
 // Salvar token de redefinição de senha
 export async function saveResetToken(email: string, token: string) {

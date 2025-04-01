@@ -1,10 +1,10 @@
 // app.ts
 import express, { Request, Response, RequestHandler } from 'express';
-import bcrypt from 'bcryptjs';
-import { createUser, authenticateUser , updateUser, deleteUser,saveResetToken, verifyResetToken, updatePassword, getUserByEmail } from './services/postgresService.js';
+import { verifyAccount, createUser, authenticateUser , updateUser, deleteUser, saveResetToken, verifyResetToken, updatePassword, getUserByEmail } from './services/postgresService.js';
 import validator from 'validator';
 import { testConnection } from './services/postgresService.js';
 import dotenv from "dotenv";
+import session from 'express-session';
 
 //Rota esqueci a senha
 import crypto from 'crypto';
@@ -98,17 +98,98 @@ app.post('/users', (async (req: Request, res: Response) => {
     return res.status(400).send('As senhas não coincidem');
   }
 
-  try {   
-    await createUser(name, email, birthdate, password);
-    res.send(`User ${name} created successfully! <a href="/login">Login</a>`);
+  // Gerar um token de verificação
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  console.log("token gerado:",verificationToken)
+
+  // Envia e-mail de verificação
+  const verificationLink = `http://localhost:3000/validado?token=${verificationToken}`;
+
+  // Configuração do envio de e-mail
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,  //  email
+      pass: process.env.EMAIL_PASS   //  senha de app
+    }
+  });
+    
+    const mailOptions = {
+      from: process.env.EMAIL_USER, //  email
+      to: email,
+      subject: 'Validação da conta',
+      text: `Clique no link para validar a sua conta:
+      
+      ${verificationLink}`
+    }
+
+  try { 
+    await transporter.sendMail(mailOptions);
+    await createUser(name, email, birthdate, password, verificationToken);
+    
+    res.send(`
+      <head>
+        <link rel="stylesheet" href="/styles.css">
+      </head>
+      <body>
+        <label>Olá ${name}, seu usuário criado! Verifique seu e-mail para ativar a conta!</label>
+      </body><br>
+      <a href="/">Início</a><br>
+    `);
+
   } catch (err) {   
     if (err instanceof Error && err.message.includes("Email already registered")) {
       return res.status(400).send("Email already exists.");
     }
     res.status(500).send(err instanceof Error ? err.message : 'Unexpected error');
   }
-}) as RequestHandler
-) ;
+}) as RequestHandler) ;
+
+//Valida a criação da conta
+app.get('/validado',(async (req: Request, res: Response) => {
+  const { token: verificationToken, email } = req.query;
+  console.log("Email recebido:", email);  // Verifique se o email está sendo passado corretamente
+  console.log("Token recebido:", verificationToken);
+
+  if (!verificationToken) {
+    return res.status(400).send("Token inválido. Sério, muito errado!!");
+  }
+
+  res.send(`
+<head>
+<head>
+      <link rel="stylesheet" href="/styles.css">
+    </head>
+    <body>
+      <h2>Conta Validada com Sucesso</h2>
+      <form action="/validado" method="POST">
+        <input type="hidden" name="email" value="${email}">  
+        <input type="hidden" name="token" value="${verificationToken}">
+        <a href="/login">Login</a>
+      </form>
+    </body>
+  `);
+}) as RequestHandler);
+
+//Solicita a validação no banco de dados
+app.post('/validado', (async (req: Request, res: Response) => {
+
+  const { email, token: verificationToken} = req.body;
+  console.log("Email recebido:", email);  // Verifique se o email está sendo passado corretamente
+  console.log("Token recebido:", verificationToken);
+  
+  const isValid = await verifyResetToken(email, verificationToken);
+  console.log("validação:",isValid)
+
+  if(!isValid){
+    return res.status(400).send("Token inválido ou expirado.");
+  }
+
+  await verifyAccount(verificationToken,email);
+  res.send("Conta validada, faça login! <a href='/login'>Fazer login</a>");
+  } 
+
+) as RequestHandler);
 
 //Formulário de reset de senha
 app.get('/forgot-password', (async (req: Request, res: Response) => {
@@ -153,7 +234,6 @@ app.post('/forgot-password', (async (req: Request, res: Response) => {
 
   // Criar link para redefinição
   const resetLink = `http://localhost:3000/reset-password?token=${token}&email=${email}`;
-  console.log("Resetlink:", resetLink)
 
   // Configuração do envio de e-mail
   const transporter = nodemailer.createTransport({
