@@ -4,3 +4,5 @@ node_modules
 backup.postgress.ts
 
 .vercel
+cert.pem/cert.pem
+key.pem/key.pem

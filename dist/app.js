@@ -7,7 +7,8 @@ import dotenv from "dotenv";
 import session from 'express-session';
 import { isAuthenticated } from './middlewares/authMiddleware.js';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import path, { dirname, join } from 'path';
+import https from 'https'; // para que possamos fazer as validações via HTTPS (validação de link)
 import fs from 'fs';
 //Rota esqueci a senha
 import crypto from 'crypto';
@@ -52,6 +53,33 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false },
 }));
+// Verifica se estamos em desenvolvimento
+const isDev = process.env.NODE_ENV !== 'production';
+if (isDev) {
+    const certPath = path.join(__dirname, 'cert.pem');
+    const keyPath = path.join(__dirname, 'key.pem');
+    if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+        console.error('Certificados SSL não encontrados. Usando HTTP em desenvolvimento...');
+        app.listen(3000, () => {
+            console.log('Servidor HTTP rodando em http://localhost:3000');
+        });
+    }
+    else {
+        const options = {
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certPath)
+        };
+        https.createServer(options, app).listen(3000, () => {
+            console.log('Servidor HTTPS rodando em https://localhost:3000');
+        });
+    }
+}
+else {
+    // Em produção, use HTTPS normalmente (a Vercel já cuida disso)
+    app.listen(3000, () => {
+        console.log('Servidor pronto para produção');
+    });
+}
 //Para acessar a pasta public (que contem meu css)
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true })); // For form data
@@ -100,7 +128,7 @@ app.post('/users', (async (req, res) => {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     console.log("token gerado:", verificationToken);
     // Envia e-mail de verificação
-    const verificationLink = `${appdomain}/validado?token=${verificationToken}`;
+    const verificationLink = `${appdomain}:${port}/validado?token=${verificationToken}`;
     // Configuração do envio de e-mail
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -120,7 +148,7 @@ app.post('/users', (async (req, res) => {
     try {
         await transporter.sendMail(mailOptions);
         await createUser(name, email, birthdate, password, verificationToken);
-        return res.status(201).send(renderMessage('success', 'Conta criada com sucesso!', 'Sua conta foi criada com sucesso. Agora você pode fazer login.', '/login'));
+        return res.status(201).send(renderMessage('success', 'Conta criada com sucesso!', 'Sua conta foi criada com sucesso. Verifique seu e-mail para aprovar a conta!', '/login'));
     }
     catch (err) {
         if (err instanceof Error && err.message.includes("Email already registered")) {
@@ -134,22 +162,27 @@ app.get('/validado', (async (req, res) => {
     const { token: verificationToken, email } = req.query;
     console.log("Email recebido:", email); // Verifique se o email está sendo passado corretamente
     console.log("Token recebido:", verificationToken);
-    if (!verificationToken) {
-        return res.status(400).send("Token inválido. Sério, muito errado!!");
+    if (!verificationToken || !email) {
+        return res.status(400).send(renderMessage('error', 'Dados incompletos', 'Token e e-mail são necessários para validação', '/register'));
     }
     res.send(`
-<head>
-<head>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Validação de Conta</title>
       <link rel="stylesheet" href="/styles.css">
     </head>
     <body>
-      <h2>Conta Validada com Sucesso</h2>
-      <form action="/validado" method="POST">
-        <input type="hidden" name="email" value="${email}">  
-        <input type="hidden" name="token" value="${verificationToken}">
-        <a href="/login">Login</a>
-      </form>
+      <div class="container">
+        <h2>Validação de Conta</h2>
+        <form action="/validado" method="POST">
+          <input type="hidden" name="email" value="${email}">
+          <input type="hidden" name="token" value="${verificationToken}">
+          <button type="submit">Confirmar Validação</button>
+        </form>
+      </div>
     </body>
+    </html>
   `);
 }));
 //Solicita a validação no banco de dados
@@ -159,11 +192,19 @@ app.post('/validado', (async (req, res) => {
     console.log("Token recebido:", verificationToken);
     const isValid = await verifyResetToken(email, verificationToken);
     console.log("validação:", isValid);
-    if (!isValid) {
-        return res.status(400).send("Token inválido ou expirado.");
+    try {
+        if (!email || !verificationToken) {
+            throw new Error('Dados incompletos para validação, verifique o e-mail ou o link de aprovação');
+        }
+        if (!isValid) {
+            throw new Error('Token inválido ou expirado');
+        }
+        await verifyAccount(verificationToken, email);
+        return res.send(renderMessage('success', 'Conta validada!', 'Sua conta foi ativada com sucesso. Você já pode fazer login.', '/login'));
     }
-    await verifyAccount(verificationToken, email);
-    res.send("Conta validada, faça login! <a href='/login'>Fazer login</a>");
+    catch (error) {
+        res.status(500).send('Ocorreu um erro ao validar sua conta');
+    }
 }));
 //Formulário de reset de senha
 app.get('/forgot-password', (async (req, res) => {
@@ -268,7 +309,25 @@ app.post('/reset-password', (async (req, res) => {
 app.post('/auth', (async (req, res) => {
     // Extrai o e-mail e a senha enviados pelo cliente no corpo da requisição
     const { email, password } = req.body;
+    // Validação básica dos campos
+    if (!email || !password) {
+        return res.status(400).send(renderMessage('error', 'Campos obrigatórios', 'E-mail e senha são obrigatórios', '/login'));
+    }
+    // Validação do formato do e-mail
+    if (!validator.isEmail(email)) {
+        return res.status(400).send(renderMessage('error', 'E-mail inválido', 'O formato do e-mail é inválido', '/login'));
+    }
     try {
+        const user = await getUserByEmail(email);
+        // Verifica se o usuário existe
+        if (!user) {
+            return res.status(401).send(renderMessage('error', 'Usuário não encontrado', 'Nenhuma conta encontrada com este e-mail', '/login'));
+        }
+        // Verifica se a conta está validado
+        if (user.verified === false) {
+            console.log("usuário verificado?", user.verified);
+            return res.status(403).send(renderMessage('error', 'Conta não verificada', 'Por favor, verifique seu e-mail para ativar sua conta', '/login'));
+        }
         // Chama a função authenticateUser para buscar e verificar o usuário no banco de dados
         const data = await authenticateUser(email, password);
         // Define o usuário na sessão
@@ -280,11 +339,12 @@ app.post('/auth', (async (req, res) => {
         res.send(renderTemplate('home.html'));
     }
     catch (err) {
-        // Registra o erro no console para ajudar na depuração
         console.error(err);
-        return res.status(401).send(renderMessage('error', 'Falha no login', err.message || 'E-mail ou senha incorretos', '/login'));
-        // Retorna um erro interno (500) com a mensagem apropriada
-        res.status(500).send(err instanceof Error ? err.message : 'Erro inesperado');
+        let errorMessage = 'E-mail ou senha incorretos';
+        if (err.message.includes('Usuário não encontrado') || err.message.includes('Senha inválida')) {
+            errorMessage = 'Credenciais inválidas';
+        }
+        return res.status(401).send(renderMessage('error', 'Falha no login', errorMessage, '/login'));
     }
 }));
 //Rota para exibir o formulário para atualizar os dados do usuário
@@ -350,7 +410,7 @@ app.get('/logout', (req, res) => {
         res.redirect('/login');
     });
 });
-// Start the express server
+// Verifica em qual porta e domain o servidor esta rodando
 app.listen(port, () => {
     console.log(`Server is running on ${appdomain}:${port}/`);
 });

@@ -42,25 +42,32 @@ export async function createUser(name: string, email: string, birthdate: string,
 }
 
 export async function verifyAccount(verificationToken: string, email:string){
-  // Busca o usuário com o token fornecido
-  const user = await prisma.user.findFirst({
-    where: { email, verificationToken },
-  });
+    try{  
+      // Busca o usuário com o token fornecido
+      const user = await prisma.user.findUnique({
+        where: { email, verificationToken },
+      });
 
-  // Valida a existência do usuário
-  if (!user) {
-    throw new Error("Token inválido ou expirado");
-  }
+      // Valida a existência do usuário
+      if (!user) {
+        throw new Error("Token inválido ou expirado");
+      }
+      console.log("passei aqui")
+      // Atualiza o usuário
+      const updatedUser = await prisma.user.update({
+        where: { email },
+        data: { 
+          verified: true
+        },
+      });
 
-  // Atualiza o usuário para marcar como verificado
-  await prisma.user.update({
-    where: { email: user.email },
-    data: { 
-      verificationToken: undefined, // Remove o token de verificação
-      verified: true // Marca a conta como verificada
-    },
-  });
-}
+      console.log('Conta atualizada:', updatedUser);
+      return updatedUser;
+
+    } catch (error) {
+      console.error('Erro ao verificar conta:', error);
+      throw error; // Propaga o erro para ser tratado na rota
+}}
 
 // Autenticar usuário
 export async function authenticateUser(email:string, password:string) {
