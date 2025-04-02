@@ -22,7 +22,6 @@ testConnection();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const appDomain = process.env.APP_DOMAIN || 'http://localhost';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
