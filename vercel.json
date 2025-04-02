@@ -1,24 +1,20 @@
 {
   "version": 2,
   "public": "public",
-  "headers": [
-    {
-      "source": "/pdf/(.*)",
-      "headers": [
-        {
-          "key": "Content-Disposition",
-          "value": "attachment"
-        }
-      ]
-    }
-  ],  
   "builds": [
     {
-      "src": "/dist/app.js",
+      "src": "dist/app.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
+    {
+      "src": "/pdf/(.*)",
+      "headers": {
+        "Content-Disposition": "attachment"
+      },
+      "dest": "/public/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "/dist/app.js"
