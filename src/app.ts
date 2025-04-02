@@ -76,7 +76,15 @@ interface UserData {
 
 // Rota para exibir a tela de escolha entre Login e Criar Conta
 app.get('/', async (req: Request, res: Response) => {
-  res.send(renderTemplate('home.html'));
+  res.send(`
+        <head>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+      <body>
+        <h2>Seja bem-vindo(a)</h2>
+        <a href="/register">Create Account</a> | <a href="/login">Login</a>
+      </body>
+    `);
 });
 
 // Rota para exibir o formulário de criação de conta
@@ -371,16 +379,9 @@ app.post('/auth', (async (req: Request, res: Response) => {
     };
     
     // Se a autenticação for bem-sucedida, envia uma resposta de boas-vindas
-    res.send(`
-      <head>
-        <link rel="stylesheet" href="/styles.css">
-      </head>
-      <body> 
-        <h2>Bem-vindo, ${data.name}!</h2>
-        <a href="/settings">Ir para Configurações</a><br>
-        <a href="/logout">Sair</a><br>
-      </body>
-    `);
+    res.send(
+      renderTemplate('home.html')
+    );
   } catch (err) {
     // Registra o erro no console para ajudar na depuração
     console.error(err);
@@ -502,6 +503,15 @@ app.get('/logout', (req: Request, res: Response) => {
 // Start the express server
 app.listen(port, () => {
   console.log(`Server is running on ${appdomain}:${port}/`);
+});
+
+//Para fazer o download da carta de apresentação
+app.get('/download-curriculo', (req, res) => {
+  res.download('/public/pdf/Cintia Reis Gonsalez Souza.pdf', 'Curriculo.pdf');
+});
+
+app.get('/download-carta', (req, res) => {
+  res.download('/public/pdf/Carta_de_apresentacao', 'Cartadeapresentacao.pdf');
 });
 
 

@@ -57,7 +57,15 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true })); // For form data
 // Rota para exibir a tela de escolha entre Login e Criar Conta
 app.get('/', async (req, res) => {
-    res.send(renderTemplate('home.html'));
+    res.send(`
+        <head>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+      <body>
+        <h2>Seja bem-vindo(a)</h2>
+        <a href="/register">Create Account</a> | <a href="/login">Login</a>
+      </body>
+    `);
 });
 // Rota para exibir o formulário de criação de conta
 app.get('/register', async (req, res) => {
@@ -309,16 +317,7 @@ app.post('/auth', (async (req, res) => {
             email: data.email,
         };
         // Se a autenticação for bem-sucedida, envia uma resposta de boas-vindas
-        res.send(`
-      <head>
-        <link rel="stylesheet" href="/styles.css">
-      </head>
-      <body> 
-        <h2>Bem-vindo, ${data.name}!</h2>
-        <a href="/settings">Ir para Configurações</a><br>
-        <a href="/logout">Sair</a><br>
-      </body>
-    `);
+        res.send(renderTemplate('home.html'));
     }
     catch (err) {
         // Registra o erro no console para ajudar na depuração

@@ -1,15 +1,114 @@
 <!DOCTYPE html>
-<html lang="pt-br"
+<html lang="pt-BR">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Início</title>
+    <title>Meu Portfólio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/home.css">
+</head>
+<body> 
+    <nav class="navbar">
+        <ul>
+            <li id="candidata"><label>Seja bem-vindo ao meu espaço como candidata!</label></li>
+            <div id="nav">
+                <a href="/settings">Configurações</a>
+                <a href="/logout">Sair</a>
+            </div>
+        </ul>
+    </nav>
 
-    <head>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-      <body>
-        <h2>Seja bem-vindo(a)</h2>
-        <a href="/register">Create Account</a> | <a href="/login">Login</a>
-      </body>
+    <div class="container">
+        <section class="about-section">
+            <div class="company-banner">
+                <!-- Banner da empresa contratante -->
+                <img src="/image/automaLogo.png" alt="Logo da Empresa Contratante" class="banner-img">
+                <div class="banner-overlay">
+                    <h3>Uma oportunidade da:</h3>
+                    <h2>Automa trade</h2>
+                </div>
+            </div>
+            
+            <div class="about-me">
+                <h2>Sobre Mim</h2>
+                <p>Olá, Meu nome é Cintia, tudo bem?
 
+                    Sou analista de sistemas com experiência em estratégia de dados há mais de 3 anos, com entendimento profundo de sistemas de computador, incluindo hardware, software e redes.</p>
+                
+                <p>Capacidade de gerenciar projetos de desenvolvimento de sistemas, incluindo o planejamento, alocação de recursos, acompanhamento do progresso e comunicação com as partes interessadas.</p>
+                
+                <p>No meu github tem um pouco mais sobre meus projetos e te convido a participar dessa experiência.</p>
+                
+                <div class="highlights">
+                    <div class="highlight-item">
+                        <i class="fas fa-medal"></i>
+                        <p>Experiência em análise de dados</p>
+                    </div>
+                    <div class="highlight-item">
+                        <i class="fas fa-certificate"></i>
+                        <p>Projeto e Implantação</p>
+                    </div>
+                    <div class="highlight-item">
+                        <i class="fas fa-star"></i>
+                        <p>Comunicação assertiva e resolutiva</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Restante do conteúdo permanece igual -->
+        <section>
+            <h2>Habilidades</h2>
+            <ul class="skills">
+                <li>HTML5</li>
+                <li>CSS3</li>
+                <li>JavaScript</li>
+                <li>Git</li>
+                <li>Typescript</li>
+                <li>Node.js</li>
+                <li>UI/UX</li>
+                <li>Figma</li>
+            </ul>
+       
+            <button class="btn" type="button" data-toggle="collapse" data-target="#moreSkills" aria-expanded="false">
+                 Uma Curiosidade
+            </button>
+            <div class="collapse-content" id="moreSkills">
+                <p>Para os que ainda não me conhecem e não tiveram a oportunidade de conversar comigo, saibam que sou uma pessoa muito comunicativa. Esse ponto me levou a ter alguns vídeos no Youtube falando o produto da empresa e no preparo materiais em vídeo para os clientes acompanharem em Webnars como o da Semana do Cliente</p>
+                <a download class="btn" style="margin-top: 1rem;" href="https://www.youtube.com/watch?v=TlwtBuTNH2g&t=400s">Veja aqui</a>
+            </div>
+        </section> 
+
+        <!-- ... (restante das seções permanece igual) ... -->
+
+    </div>
+
+    <footer>
+        <h2>Contato</h2>
+        <p><i class="fas fa-envelope"></i> Email: <a href="mailto:cintia.gonsalez@outlook.com.br">cintia.gonsalez@outlook.com.br</a></p>
+        <p><i class="fab fa-linkedin"></i> LinkedIn: <a href="https://www.linkedin.com/in/cintia-reis-gonsalez-souza/" target="_blank">Meu Perfil</a></p>
+        <p><i class="fab fa-github"></i> GitHub: <a href="https://github.com/Cintia-97" target="_blank">github.com/Cintia-97</a></p>
+        
+        <a href="/public/PDF/Cintia_Reis_Gonsalez_Souza.pdf" download="Curriculo_Cintia_Reis.pdf" class="btn" style="margin-top: 1rem;">
+            <i class="fas fa-download"></i> Baixar Currículo (PDF)
+        </a>
+        
+        <a href="/public/PDF/Carta_de_Apresentacao.pdf" download="Carta_de_Apresentacao.pdf" class="btn" style="margin-top: 1rem;">
+            <i class="fas fa-download"></i> Carta de Apresentação (PDF)
+        </a>
+
+    </footer>
+
+    <script>
+        // Simples funcionalidade para o collapse
+        document.querySelector('[data-target="#moreSkills"]').addEventListener('click', function() {
+            const content = document.getElementById('moreSkills');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            content.style.display = isExpanded ? 'none' : 'block';
+            this.setAttribute('aria-expanded', !isExpanded);
+            this.textContent = isExpanded ? 'Mostrar Mais Habilidades' : 'Ocultar Habilidades';
+        });
+    </script>
+</body>
 </html>

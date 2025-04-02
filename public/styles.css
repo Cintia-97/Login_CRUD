@@ -51,4 +51,79 @@ body {
   a:hover {
     text-decoration: underline;
   }
-  
+
+  /*
+
+  nav {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: right;
+  }
+
+li {
+    display: inline;
+  }
+   nav*/
+
+.navbar {
+    background: linear-gradient(135deg, #7fb902, #bccf91);
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.navbar ul {
+    display: flex;
+    justify-content: flex-end;
+    list-style: none;
+    gap: 2rem;
+}
+
+#nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+#nav a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+#nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: white;
+    transition: width 0.3s ease;
+}
+
+#nav a:hover::after {
+    width: 100%;
+}
+
+/* Efeito ativo (para a página atual) */
+#nav a.active {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+#candidata {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+}
