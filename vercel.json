@@ -1,20 +1,12 @@
 {
   "version": 2,
-  "public": "public",
   "builds": [
     {
-      "src": "dist/app.js",
+      "src": "/dist/app.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/pdf/(.*)",
-      "headers": {
-        "Content-Disposition": "attachment"
-      },
-      "dest": "/public/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "/dist/app.js"
