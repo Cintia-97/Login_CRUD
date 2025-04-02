@@ -18,6 +18,7 @@ dotenv.config();
 testConnection();
 const app = express();
 const port = process.env.PORT || 3000;
+const appDomain = process.env.APP_DOMAIN || 'http://localhost';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const publicPaths = [
@@ -111,7 +112,7 @@ app.post('/users', (async (req, res) => {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     console.log("token gerado:", verificationToken);
     // Envia e-mail de verificação
-    const verificationLink = `http://localhost:3000/validado?token=${verificationToken}`;
+    const verificationLink = `${appDomain}/validado?token=${verificationToken}`;
     // Configuração do envio de e-mail
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -221,7 +222,7 @@ app.post('/forgot-password', (async (req, res) => {
     // Salvar o token no banco com validade (ex: 1 hora)
     await saveResetToken(email, token);
     // Criar link para redefinição
-    const resetLink = `http://localhost:3000/reset-password?token=${token}&email=${email}`;
+    const resetLink = `${appDomain}/reset-password?token=${token}&email=${email}`;
     // Configuração do envio de e-mail
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -429,6 +430,6 @@ app.get('/logout', (req, res) => {
 });
 // Start the express server
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server is running on ${appDomain}:${port}`);
 });
 export default app;

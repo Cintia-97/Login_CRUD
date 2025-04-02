@@ -22,7 +22,7 @@ testConnection();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const appDomain = process.env.APP_DOMAIN || 'http://localhost:3000';
+const appDomain = process.env.APP_DOMAIN || 'http://localhost';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -501,7 +501,7 @@ app.get('/logout', (req: Request, res: Response) => {
 
 // Start the express server
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on ${appDomain}:${port}`);
 });
 
 
