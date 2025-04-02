@@ -6,6 +6,9 @@ import { testConnection } from './services/postgresService.js';
 import dotenv from "dotenv";
 import session from 'express-session';
 import { isAuthenticated } from './middlewares/authMiddleware.js';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import fs from 'fs';
 //Rota esqueci a senha
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
@@ -15,6 +18,32 @@ dotenv.config();
 testConnection();
 const app = express();
 const port = process.env.PORT || 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const publicPaths = [
+    join(__dirname, 'public'),
+    join(__dirname, '..', 'public')
+];
+publicPaths.forEach(publicPath => {
+    if (fs.existsSync(publicPath)) {
+        app.use(express.static(publicPath));
+    }
+});
+function getTemplatePath(templatePath) {
+    const devPath = join(__dirname, '..', 'src', 'templates', templatePath);
+    const prodPath = join(__dirname, 'templates', templatePath);
+    try {
+        fs.accessSync(prodPath);
+        return prodPath;
+    }
+    catch {
+        return devPath;
+    }
+}
+function renderTemplate(templatePath) {
+    const fullPath = getTemplatePath(templatePath);
+    return fs.readFileSync(fullPath, 'utf-8');
+}
 //Configuração da sessão
 app.use(session({
     secret: 'secret-key',
@@ -27,15 +56,7 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true })); // For form data
 // Rota para exibir a tela de escolha entre Login e Criar Conta
 app.get('/', async (req, res) => {
-    res.send(`
-    <head>
-      <link rel="stylesheet" href="/styles.css">
-    </head>
-    <body>
-      <h2>Seja bem-vindo(a)</h2>
-      <a href="/register">Create Account</a> | <a href="/login">Login</a>
-    </body>
-  `);
+    res.send(renderTemplate('home.html'));
 });
 // Rota para exibir o formulário de criação de conta
 app.get('/register', async (req, res) => {

@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "postinstall": "prisma generate",
-    "build": "prisma generate && tsc",
+    "build": "prisma generate && tsc && cpx \"src/**/*.html\" dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc && nodemon dist/app.js",
+    "dev": "npm run build && nodemon -e ts,js dist/app.js",
     "start": "node dist/app.js"
   },
   "keywords": [],
