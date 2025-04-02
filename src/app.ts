@@ -22,6 +22,7 @@ testConnection();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const appdomain = process.env.APP_DOMAIN || 'https://localhost';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -138,7 +139,7 @@ app.post('/users', (async (req: Request, res: Response) => {
   console.log("token gerado:",verificationToken)
 
   // Envia e-mail de verificação
-  const verificationLink = `https://login-crud-automatrade-j85lb6itc-cintia-97s-projects.vercel.app/validado?token=${verificationToken}`;
+  const verificationLink = `${appdomain}/validado?token=${verificationToken}`;
 
   // Configuração do envio de e-mail
   const transporter = nodemailer.createTransport({
@@ -268,7 +269,7 @@ app.post('/forgot-password', (async (req: Request, res: Response) => {
   await saveResetToken(email, token);
 
   // Criar link para redefinição
-  const resetLink = `https://login-crud-automatrade-j85lb6itc-cintia-97s-projects.vercel.app/reset-password?token=${token}&email=${email}`;
+  const resetLink = `${appdomain}/reset-password?token=${token}&email=${email}`;
 
   // Configuração do envio de e-mail
   const transporter = nodemailer.createTransport({
@@ -500,7 +501,7 @@ app.get('/logout', (req: Request, res: Response) => {
 
 // Start the express server
 app.listen(port, () => {
-  console.log(`Server is running on https://login-crud-automatrade-j85lb6itc-cintia-97s-projects.vercel.app/:${port}`);
+  console.log(`Server is running on ${appdomain}:${port}/`);
 });
 
 
