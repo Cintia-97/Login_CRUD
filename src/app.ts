@@ -186,8 +186,8 @@ app.post('/users', (async (req: Request, res: Response) => {
   console.log("token gerado:",verificationToken)
 
   // Envia e-mail de verificação
-  const verificationLink = `${appdomain}/validado?token=${verificationToken}`;
-
+  const verificationLink = `${appdomain}/validado?token=${verificationToken}&email=${email}`;
+  console.log("verificationLink:", verificationLink)
   // Configuração do envio de e-mail
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -235,6 +235,8 @@ app.get('/validado',(async (req: Request, res: Response) => {
   const { token: verificationToken, email } = req.query;
   console.log("Email recebido:", email);  // Verifique se o email está sendo passado corretamente
   console.log("Token recebido:", verificationToken);
+  console.log("validado")
+  console.log("validado")
 
   if (!verificationToken || !email) {
     return res.status(400).send(renderMessage(
@@ -268,32 +270,32 @@ app.get('/validado',(async (req: Request, res: Response) => {
 
 //Solicita a validação no banco de dados
 app.post('/validado', (async (req: Request, res: Response) => {
-
-  const { email, token: verificationToken} = req.body;
-  console.log("Email recebido:", email);  // Verifique se o email está sendo passado corretamente
-  console.log("Token recebido:", verificationToken);
+  const { email, token: verificationToken } = req.body;
   
-  const isValid = await verifyResetToken(email, verificationToken);
-  console.log("validação:",isValid)
-try{
+  try {
+      if (!email || !verificationToken) {
+          throw new Error('Email e token são obrigatórios');
+      }
 
-  if (!email || !verificationToken) {
-    throw new Error('Dados incompletos para validação, verifique o e-mail ou o link de aprovação');
-  }
+      console.log(`Tentando validar conta para ${email} com token ${verificationToken}`);
+      
+      await verifyAccount(verificationToken, email);
+      
+      return res.send(renderMessage(
+          'success',
+          'Conta validada!',
+          'Sua conta foi ativada com sucesso. Você já pode fazer login.',
+          '/login'
+      ));
 
-  if(!isValid){
-    throw new Error('Token inválido ou expirado');
-  }
-
-  await verifyAccount(verificationToken,email);
-  return res.send(renderMessage(
-    'success',
-    'Conta validada!',
-    'Sua conta foi ativada com sucesso. Você já pode fazer login.',
-    '/login'
-  ));
-} catch (error) {
-     res.status(500).send('Ocorreu um erro ao validar sua conta');
+  } catch (error: any) {
+      console.error('Erro na rota de validação:', error);
+      res.status(400).send(renderMessage(
+          'error',
+          'Falha na validação',
+          error.message || 'Ocorreu um erro ao validar sua conta',
+          '/register'
+      ));
   }
 }) as RequestHandler);
 

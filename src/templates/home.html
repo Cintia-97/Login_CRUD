@@ -56,7 +56,6 @@
             </div>
         </section>
 
-        <!-- Restante do conteúdo permanece igual -->
         <section>
             <h2>Habilidades</h2>
             <ul class="skills">
@@ -66,7 +65,7 @@
                 <li>Git</li>
                 <li>Typescript</li>
                 <li>Node.js</li>
-                <li>UI/UX</li>
+                <li>Prisma</li>
                 <li>Figma</li>
             </ul>
        
@@ -79,8 +78,39 @@
             </div>
         </section> 
 
-        <!-- ... (restante das seções permanece igual) ... -->
 
+    </div>
+
+    <div>
+        <section>
+            <h2>Sobre o Code Challenge: Faça Login CRUD</h2>
+            <div class="highlights">
+                <div class="highlight-item">
+                    <i class="fa-solid fa-laptop"></i>
+                    <p>Você o encontra no meu github </p>
+                </div>
+                <div class="highlight-item">
+                    <i class="fa-solid fa-cube"></i>
+                    <p>Utilizada plataforma Supabase para armazenamento de dados</p>
+                </div>
+                <div class="highlight-item">
+                    <i class="fa-solid fa-hotel"></i>
+                    <p>A Vercel utilizado para hospedagem</p>
+                </div>
+                <div class="highlight-item">
+                    <i class="fa-solid fa-square-envelope"></i>
+                    <p>O envio do token é relizada utilizando GMAIL</p>
+                </div>
+                <div class="highlight-item">
+                    <i class="fa-regular fa-circle-nodes"></i>
+                    <p>Utilizei node.js, Typescript</p>
+                </div>
+                <div class="highlight-item">
+                    <i class="fa-solid fa-database"></i>
+                    <p>Banco de dados Postgres</p>
+                </div>
+            </div>
+        </section>
     </div>
 
     <footer>
@@ -89,22 +119,21 @@
         <p><i class="fab fa-linkedin"></i> LinkedIn: <a href="https://www.linkedin.com/in/cintia-reis-gonsalez-souza/" target="_blank">Meu Perfil</a></p>
         <p><i class="fab fa-github"></i> GitHub: <a href="https://github.com/Cintia-97" target="_blank">github.com/Cintia-97</a></p>
         
-        <a href="/public/PDF/Cintia Reis Gonsalez Souza.pdf" download class="btn" style="margin-top: 1rem;">
+        <a href="/pdf/Cintia_Reis_Gonsalez_Souza.pdf" download class="btn" style="margin-top: 1rem;">
             <i class="fas fa-download"></i> Baixar Currículo (PDF)
         </a>
 
-        <a href="/public/PDF/Carta de Apresentação.pdf" download class="btn" style="margin-top: 1rem;">
+        <a href="/pdf/Carta_de_Apresentacao.pdf" download class="btn" style="margin-top: 1rem;">
             <i class="fas fa-download"></i> Carta de Apresentação (PDF)
         </a>
 
     </footer>
 
     <script>
-        // Simples funcionalidade para o collapse
+
         document.querySelector('[data-target="#moreSkills"]').addEventListener('click', function() {
             const content = document.getElementById('moreSkills');
             const isExpanded = this.getAttribute('aria-expanded') === 'true';
-            
             content.style.display = isExpanded ? 'none' : 'block';
             this.setAttribute('aria-expanded', !isExpanded);
             this.textContent = isExpanded ? 'Mostrar Mais Habilidades' : 'Ocultar Habilidades';

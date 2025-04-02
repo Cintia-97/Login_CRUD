@@ -1,5 +1,17 @@
 {
   "version": 2,
+  "public": "public",
+  "headers": [
+    {
+      "source": "/pdf/(.*)",
+      "headers": [
+        {
+          "key": "Content-Disposition",
+          "value": "attachment"
+        }
+      ]
+    }
+  ],  
   "builds": [
     {
       "src": "/dist/app.js",

@@ -150,3 +150,11 @@ body {
         padding: 25px 20px;
     }
 }
+
+.toggle-checkbox {
+    display: none;
+}
+
+.toggle-checkbox:checked ~ input[type="password"] {
+    -webkit-text-security: none;
+}
