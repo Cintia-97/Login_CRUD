@@ -22,6 +22,7 @@ testConnection();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const appDomain = process.env.APP_DOMAIN || 'http://localhost:3000';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -138,7 +139,7 @@ app.post('/users', (async (req: Request, res: Response) => {
   console.log("token gerado:",verificationToken)
 
   // Envia e-mail de verificação
-  const verificationLink = `http://localhost:3000/validado?token=${verificationToken}`;
+  const verificationLink = `${appDomain}:3000/validado?token=${verificationToken}`;
 
   // Configuração do envio de e-mail
   const transporter = nodemailer.createTransport({
@@ -268,7 +269,7 @@ app.post('/forgot-password', (async (req: Request, res: Response) => {
   await saveResetToken(email, token);
 
   // Criar link para redefinição
-  const resetLink = `http://localhost:3000/reset-password?token=${token}&email=${email}`;
+  const resetLink = `${appDomain}/reset-password?token=${token}&email=${email}`;
 
   // Configuração do envio de e-mail
   const transporter = nodemailer.createTransport({
