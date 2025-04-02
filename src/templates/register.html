@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Meu Portfólio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="register.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1>Criar conta</h1>
+                <p class="subtitle">Preencha seus dados para se registrar</p>
+            </div>
+            
+            <form class="register-form" action="/users" method="POST">
+                <div class="form-group">
+                    <label for="name">Nome completo</label>
+                    <div class="input-container">
+                        <i class="fas fa-user icon"></i>
+                        <input type="text" id="name" name="name" placeholder="Digite seu nome" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <div class="input-container">
+                        <i class="fas fa-envelope icon"></i>
+                        <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="birthdate">Data de nascimento</label>
+                    <div class="input-container">
+                        <i class="fas fa-calendar-alt icon"></i>
+                        <input type="date" id="birthdate" name="birthdate" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <div class="input-container">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" id="password" name="password" placeholder="Mínimo 8 caracteres" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirme a senha</label>
+                    <div class="input-container">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Digite novamente" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-register">Criar conta</button>
+                
+                <div class="login-link">
+                    Já tem uma conta? <a href="/login">Faça login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

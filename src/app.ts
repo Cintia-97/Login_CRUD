@@ -74,56 +74,42 @@ interface UserData {
   confirmPassword?: string;
 }
 
+function renderMessage(type: 'success' | 'error' | 'info', title: string, message: string, backLink: string = '/'): string {
+  const template = renderTemplate('messageTemplate.html');
+  
+  const icons = {
+      success: 'fa-check-circle',
+      error: 'fa-exclamation-circle',
+      info: 'fa-info-circle'
+  };
+  
+  return template
+      .replace('{{iconClass}}', type)
+      .replace('{{icon}}', icons[type])
+      .replace('{{title}}', title)
+      .replace('{{message}}', message)
+      .replace('{{backLink}}', backLink);
+}
+
 // Rota para exibir a tela de escolha entre Login e Criar Conta
 app.get('/', async (req: Request, res: Response) => {
-  res.send(`
-        <head>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-      <body>
-        <h2>Seja bem-vindo(a)</h2>
-        <a href="/register">Create Account</a> | <a href="/login">Login</a>
-      </body>
-    `);
+  res.send(
+        renderTemplate('inicial.html') 
+    );
 });
 
 // Rota para exibir o formulário de criação de conta
 app.get('/register', async (req: Request, res: Response) => {
-  res.send(`
-    <head>
-      <link rel="stylesheet" href="/styles.css">
-    </head>
-    <body>  
-      <h2>Create User</h2>
-      <form action="/users" method="POST">
-        <label>Name: <input type="text" name="name" required></label><br>
-        <label>Email: <input type="email" name="email" required></label><br>
-        <label>Birthdate: <input type="date" name="birthdate" required></label><br>
-        <label>Password: <input type="password" name="password" required></label><br>
-        <label>Confirm Password: <input type="password" name="confirmPassword" required></label><br>
-        <button type="submit">Create</button>
-      </form>
-    </body>
-  `);
+  res.send(
+    renderTemplate('register.html') 
+  );
 });
 
 //Rota de Login do usuário
 app.get('/login', async (req: Request, res: Response) => {
-  res.send(`
-    <head>
-      <link rel="stylesheet" href="/styles.css">
-    </head>
-    <body>
-      <h2>Login</h2>
-      <form action="/auth" method="POST">
-        <label>Email: <input type="email" name="email" required></label><br>
-        <label>Password: <input type="password" name="password" required></label><br>
-        <a href="/forgot-password">Esqueci a senha</a><br>
-        <button type="submit">Login</button>
-      </form>
-      <a href="/">Back</a>
-    </body>
-  `);
+  res.send(
+    renderTemplate('login.html') 
+  );
 });
 
 //Para criar um novo usuário e chama a função de conexão com o banco de dados
@@ -131,15 +117,39 @@ app.post('/users', (async (req: Request, res: Response) => {
   const { name, email, birthdate, password, confirmPassword } = req.body;
 
   if (!name || !email || !birthdate || !password || !confirmPassword) {
-    return res.status(400).send('All fields are required');
+    return res.status(400).send(renderMessage(
+      'error',
+      'Campos obrigatórios',
+      'Todos os campos são obrigatórios',
+      '/register'
+    ));
   }
 
   if (!validator.isEmail(email)) {
-    return res.status(400).send('Formato inválido de e-mail');
+    return res.status(400).send(renderMessage(
+      'error',
+      'E-mail inválido',
+      'O formato do e-mail é inválido',
+      '/register'
+    ));
+  }
+
+  if (password.length <= 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return res.status(400).send(renderMessage(
+      'error',
+      'Senha fraca',
+      'A senha deve ter pelo menos 8 caracteres e conter pelo menos um caractere especial.',
+      '/register'
+    ));
   }
 
   if (password !== confirmPassword) {
-    return res.status(400).send('As senhas não coincidem');
+    return res.status(400).send(renderMessage(
+      'error',
+      'Senhas não conferem',
+      'As senhas digitadas não são iguais',
+      '/register'
+    ));
   }
 
   // Gerar um token de verificação
@@ -171,19 +181,21 @@ app.post('/users', (async (req: Request, res: Response) => {
     await transporter.sendMail(mailOptions);
     await createUser(name, email, birthdate, password, verificationToken);
     
-    res.send(`
-      <head>
-        <link rel="stylesheet" href="/styles.css">
-      </head>
-      <body>
-        <label>Olá ${name}, seu usuário criado! Verifique seu e-mail para ativar a conta!</label>
-      </body><br>
-      <a href="/">Início</a><br>
-    `);
+    return res.status(201).send(renderMessage(
+      'success',
+      'Conta criada com sucesso!',
+      'Sua conta foi criada com sucesso. Agora você pode fazer login.',
+      '/login'
+    ));
 
   } catch (err) {   
     if (err instanceof Error && err.message.includes("Email already registered")) {
-      return res.status(400).send("Email already exists.");
+      return res.status(400).send(renderMessage(
+        'error',
+        'Erro ao criar conta',
+        err.message || 'Ocorreu um erro ao tentar criar sua conta',
+        '/register'
+      ));
     }
     res.status(500).send(err instanceof Error ? err.message : 'Unexpected error');
   }
@@ -237,19 +249,9 @@ app.post('/validado', (async (req: Request, res: Response) => {
 
 //Formulário de reset de senha
 app.get('/forgot-password', (async (req: Request, res: Response) => {
-  res.send(`
-    <head>
-      <link rel="stylesheet" href="/styles.css">
-    </head>
-    <body>
-      <h2>Esqueceu a senha?</h2>
-      <form action="/forgot-password" method="POST">
-        <label>Email: <input type="email" name="email" required></label><br>
-        <button type="submit">Login</button>
-      </form>
-      <a href="/">Voltar</a>
-    </body>
-  `);
+  res.send(
+    renderTemplate('forgot-password.html') 
+  );
 }));
 
 //Rota para gerar o token e validar o e-mail
@@ -382,9 +384,17 @@ app.post('/auth', (async (req: Request, res: Response) => {
     res.send(
       renderTemplate('home.html')
     );
-  } catch (err) {
+  } catch (err: any) {
     // Registra o erro no console para ajudar na depuração
     console.error(err);
+
+    return res.status(401).send(renderMessage(
+      'error',
+      'Falha no login',
+      err.message || 'E-mail ou senha incorretos',
+      '/login'
+    ));
+
     // Retorna um erro interno (500) com a mensagem apropriada
     res.status(500).send(err instanceof Error ? err.message : 'Erro inesperado');
   }
@@ -392,23 +402,9 @@ app.post('/auth', (async (req: Request, res: Response) => {
 
 //Rota para exibir o formulário para atualizar os dados do usuário
 app.get('/settings', isAuthenticated, (async (req: Request, res: Response) => {
-  res.send(`
-    <head>
-      <link rel="stylesheet" href="/styles.css">
-    </head>
-    <body>
-      <h2>Dados do Usuário</h2>
-      <form action="/update" method="POST">
-        <label>Nome: <input type="text" name="name" required></label><br>
-        <label>Email: <input type="email" name="email" required></label><br>
-        <label>Data de Nascimento: <input type="date" name="birthdate" required></label><br>
-        <label>Senha: <input type="password" name="password" required></label><br>
-        <label>Confirmar Senha: <input type="password" name="confirmPassword" required></label><br>
-        <button type="submit">Atualizar</button>
-        <a href="/delete">deletar conta</a>
-      </form>
-    </body>
-  `);
+  res.send(
+    renderTemplate('settings.html')
+  );
 }) as RequestHandler);
 
 // Rota  para atualizar os dados do usuário
@@ -429,18 +425,20 @@ app.post('/update', (async (req: Request, res: Response) => {
 
   try {
     await updateUser(email, name, password);
-    res.send(`
-      <head>
-        <link rel="stylesheet" href="/styles.css">
-      </head>
-      <body>
-        <h2>Conta atualizada com sucesso!</h2>
-        <a href="/settings">Ir para Configurações</a>
-      </body>
-    `);
+    return res.status(200).send(renderMessage(
+      'success',
+      'Dados atualizados',
+      'Seus dados foram atualizados com sucesso!',
+      '/settings'
+    ));
   } catch (err) {
     if (err instanceof Error && err.message.includes("User not found")) {
-      return res.status(404).send("Usuário não encontrado.");
+      return res.status(404).send(renderMessage(
+        'error',
+        'Erro na atualização',
+        err.message || 'Ocorreu um erro ao atualizar seus dados',
+        '/settings'
+      ));
     }
     res.status(500).send(err instanceof Error ? err.message : 'Erro inesperado');
   }
@@ -448,21 +446,9 @@ app.post('/update', (async (req: Request, res: Response) => {
 
 // Rota para exibir a confirmação de exclusão de conta
 app.get('/delete', (req: Request, res: Response) => {
-  res.send(`
-    <head>
-      <link rel="stylesheet" href="/styles.css">
-    </head>
-
-    <body>
-        <h2>Deletar Conta</h2>
-        <p style="color: red;">Atenção: Este processo é irreversível! Todos os seus dados serão apagados permanentemente.</p>
-        <form action="/delete" method="POST">
-          <label>Email: <input type="email" name="email" required></label><br>
-          <button type="submit" style="background-color: red; color: white;">Confirmar Exclusão</button>
-          <a href="/settings">Cancelar</a>
-        </form>
-    </body>
-  `);
+  res.send(
+    renderTemplate('delete.html')
+  );
 });
 
 // Rota para deletar o usuário
@@ -470,7 +456,12 @@ app.post('/delete', (async (req: Request, res: Response) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).send("O e-mail é obrigatório para excluir a conta.");
+    return res.status(400).send(renderMessage(
+      'error',
+      'erro no email',
+      'O e-mail é obrigatório para excluir a conta.',
+      '/register'
+    ));
   }
 
   try {

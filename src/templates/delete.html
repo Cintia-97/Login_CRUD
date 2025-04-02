@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deletar Conta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="delete.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1><i class="fas fa-exclamation-triangle"></i> Excluir Conta</h1>
+                <p class="subtitle">Esta ação é permanente e irreversível</p>
+            </div>
+            
+            <div class="warning-box">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Todos os seus dados serão apagados permanentemente do nosso sistema.</p>
+            </div>
+            
+            <form class="delete-form" action="/delete" method="POST">
+                <div class="form-group">
+                    <label for="email">Digite seu e-mail para confirmar</label>
+                    <div class="input-container">
+                        <i class="fas fa-envelope icon"></i>
+                        <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-delete">
+                        <i class="fas fa-trash-alt"></i> Confirmar Exclusão
+                    </button>
+                    <a href="/settings" class="btn-cancel">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

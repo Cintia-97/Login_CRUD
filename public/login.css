@@ -1,0 +1,152 @@
+/* Reset e Estilos Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0f2fe 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Container Principal */
+.container {
+    width: 100%;
+    max-width: 450px;
+}
+
+/* Card de Login */
+.card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #008fb9;
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.card-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.card-header .subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+/* Formulário */
+.login-form {
+    padding: 30px;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #7fb902;
+    box-shadow: 0 0 0 3px rgba(127, 185, 2, 0.2);
+    outline: none;
+}
+
+.icon {
+    position: absolute;
+    left: 15px;
+    bottom: 12px;
+    color: #888;
+}
+
+/* Opções do Formulário */
+.form-options {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 25px;
+}
+
+.forgot-password {
+    color: #008fb9;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* Botão */
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background-color: #7fb902;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-login:hover {
+    background-color: #6fa002;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(127, 185, 2, 0.3);
+}
+
+/* Link de Registro */
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.register-link a {
+    color: #008fb9;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+    .card-header {
+        padding: 25px 20px;
+    }
+    
+    .login-form {
+        padding: 25px 20px;
+    }
+}
