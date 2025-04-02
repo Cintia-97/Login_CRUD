@@ -139,7 +139,7 @@ app.post('/users', (async (req: Request, res: Response) => {
   console.log("token gerado:",verificationToken)
 
   // Envia e-mail de verificação
-  const verificationLink = `${appDomain}:3000/validado?token=${verificationToken}`;
+  const verificationLink = `${appDomain}/validado?token=${verificationToken}`;
 
   // Configuração do envio de e-mail
   const transporter = nodemailer.createTransport({
