@@ -199,3 +199,44 @@ body {
         font-size: 0.8rem;
     }
 }
+
+/* ... (mantenha todo o CSS existente) ... */
+
+/* Botão Voltar */
+.back-button-container {
+    padding: 0 30px 30px;
+    text-align: left;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    color: #008fb9;
+    border: 1px solid #008fb9;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-back:hover {
+    background-color: #e0f2fe;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 143, 185, 0.1);
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+    .back-button-container {
+        padding: 0 15px 20px;
+    }
+    
+    .btn-back {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+}

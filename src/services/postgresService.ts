@@ -15,16 +15,20 @@ export async function testConnection() {
 
 // Criar usuário
 export async function createUser(name: string, email: string, birthdate: string, password: string, verificationToken: string) {
+  
+  /*
   // Verifica se o usuário já existe
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
 
+  
   //Verifica se o usuário existe no banco
   if (existingUser) {
     throw new Error("E-mail já cadastrado.");
   }
-
+  
+  */
   // Hash da senha
   const hashedPassword = await bcrypt.hash(password.trim(), 10);
 

@@ -147,12 +147,18 @@ app.post('/users', (async (req, res) => {
       ${verificationLink}`
     };
     try {
+        const user = await getUserByEmail(email);
+        // Verifica se o usuário existe
+        if (user) {
+            return res.status(401).send(renderMessage('info', 'Email cadastrado', 'A conta já está cadastrada, vamos fazer o login?', '/login'));
+        }
         await transporter.sendMail(mailOptions);
         await createUser(name, email, birthdate, password, verificationToken);
         return res.status(201).send(renderMessage('success', 'Conta criada com sucesso!', 'Sua conta foi criada com sucesso. Verifique seu e-mail para aprovar a conta!', '/login'));
     }
     catch (err) {
         if (err instanceof Error && err.message.includes("Email already registered")) {
+            console.log("conta já existe");
             return res.status(400).send(renderMessage('error', 'Erro ao criar conta', err.message || 'Ocorreu um erro ao tentar criar sua conta', '/register'));
         }
         res.status(500).send(err instanceof Error ? err.message : 'Unexpected error');
@@ -349,6 +355,10 @@ app.post('/auth', (async (req, res) => {
 app.get('/settings', isAuthenticated, (async (req, res) => {
     res.send(renderTemplate('settings.html'));
 }));
+//Rota para minha página principal
+app.get('/principal', (async (req, res) => {
+    res.send(renderTemplate('home.html'));
+}));
 // Rota  para atualizar os dados do usuário
 app.post('/update', (async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
@@ -360,6 +370,9 @@ app.post('/update', (async (req, res) => {
     }
     if (password !== confirmPassword) {
         return res.status(400).send('As senhas não coincidem');
+    }
+    if (password.length <= 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        return res.status(400).send(renderMessage('error', 'Senha fraca', 'A senha deve ter pelo menos 8 caracteres e conter pelo menos um caractere especial.', '/register'));
     }
     try {
         await updateUser(email, name, password);

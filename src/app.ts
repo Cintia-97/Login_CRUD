@@ -207,6 +207,18 @@ app.post('/users', (async (req: Request, res: Response) => {
     }
 
   try { 
+    const user = await getUserByEmail(email);
+
+    // Verifica se o usuário existe
+    if (user) {   
+      return res.status(401).send(renderMessage(
+        'info',
+        'Email cadastrado',
+        'A conta já está cadastrada, vamos fazer o login?',
+        '/login'
+      ));
+    }
+    
     await transporter.sendMail(mailOptions);
     await createUser(name, email, birthdate, password, verificationToken);
     
@@ -219,6 +231,7 @@ app.post('/users', (async (req: Request, res: Response) => {
 
   } catch (err) {   
     if (err instanceof Error && err.message.includes("Email already registered")) {
+      console.log("conta já existe")
       return res.status(400).send(renderMessage(
         'error',
         'Erro ao criar conta',
@@ -502,6 +515,13 @@ app.get('/settings', isAuthenticated, (async (req: Request, res: Response) => {
   );
 }) as RequestHandler);
 
+//Rota para minha página principal
+app.get('/principal', (async(req: Request, res: Response) => {
+  res.send(
+    renderTemplate('home.html') 
+  );
+}) as RequestHandler);
+
 // Rota  para atualizar os dados do usuário
 app.post('/update', (async (req: Request, res: Response) => {
   const { name, email, password, confirmPassword } = req.body;
@@ -516,6 +536,15 @@ app.post('/update', (async (req: Request, res: Response) => {
 
   if (password !== confirmPassword) {
     return res.status(400).send('As senhas não coincidem');    
+  }
+
+  if (password.length <= 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return res.status(400).send(renderMessage(
+      'error',
+      'Senha fraca',
+      'A senha deve ter pelo menos 8 caracteres e conter pelo menos um caractere especial.',
+      '/register'
+    ));
   }
 
   try {
