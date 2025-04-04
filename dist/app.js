@@ -1,5 +1,6 @@
 // app.ts
 import express from 'express';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { verifyAccount, createUser, authenticateUser, updateUser, deleteUser, saveResetToken, verifyResetToken, updatePassword, getUserByEmail } from './services/postgresService.js';
 import validator from 'validator';
 import { testConnection } from './services/postgresService.js';
@@ -13,7 +14,7 @@ import fs from 'fs';
 //Rota esqueci a senha
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
-//Conexão com e-mail
+//Minhas informações confidenciais
 dotenv.config();
 // Testar conexão ao iniciar
 testConnection();
@@ -254,15 +255,7 @@ app.post('/forgot-password', (async (req, res) => {
     };
     try {
         await transporter.sendMail(mailOptions);
-        res.send(`
-      <head>
-        <link rel="stylesheet" href="/styles.css">
-      </head>
-      <body>
-        <label>E-mail enviado com sucesso! Verifique sua caixa de entrada</label>
-      </body>
-      <a href="/">Início</a>
-      `);
+        return res.status(200).send(renderMessage('success', 'E-mail enviado com sucesso!', 'Verifique sua caixa de entrada', '/Login'));
     }
     catch (error) {
         res.status(500).send("Erro ao enviar e-mail.");
@@ -356,11 +349,11 @@ app.get('/settings', isAuthenticated, (async (req, res) => {
     res.send(renderTemplate('settings.html'));
 }));
 //Rota para minha página principal
-app.get('/principal', (async (req, res) => {
+app.get('/principal', isAuthenticated, (async (req, res) => {
     res.send(renderTemplate('home.html'));
 }));
 // Rota  para atualizar os dados do usuário
-app.post('/update', (async (req, res) => {
+app.post('/update', isAuthenticated, (async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
     if (!name || !email || !password || !confirmPassword) {
         return res.status(400).send('Todos os campos são obrigatórios');
@@ -372,11 +365,11 @@ app.post('/update', (async (req, res) => {
         return res.status(400).send('As senhas não coincidem');
     }
     if (password.length <= 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-        return res.status(400).send(renderMessage('error', 'Senha fraca', 'A senha deve ter pelo menos 8 caracteres e conter pelo menos um caractere especial.', '/register'));
+        return res.status(400).send(renderMessage('error', 'Senha fraca', 'A senha deve ter pelo menos 8 caracteres e conter pelo menos um caractere especial.', '/settings'));
     }
     try {
         await updateUser(email, name, password);
-        return res.status(200).send(renderMessage('success', 'Dados atualizados', 'Seus dados foram atualizados com sucesso!', '/settings'));
+        return res.status(200).send(renderMessage('success', 'Dados atualizados', 'Seus dados foram atualizados com sucesso!', '/principal'));
     }
     catch (err) {
         if (err instanceof Error && err.message.includes("User not found")) {
@@ -386,34 +379,35 @@ app.post('/update', (async (req, res) => {
     }
 }));
 // Rota para exibir a confirmação de exclusão de conta
-app.get('/delete', (req, res) => {
+app.get('/delete', isAuthenticated, (req, res) => {
     res.send(renderTemplate('delete.html'));
 });
 // Rota para deletar o usuário
-app.post('/delete', (async (req, res) => {
+app.post('/delete', isAuthenticated, (async (req, res) => {
     const { email } = req.body;
+    const user = await getUserByEmail(email);
     if (!email) {
-        return res.status(400).send(renderMessage('error', 'erro no email', 'O e-mail é obrigatório para excluir a conta.', '/register'));
+        return res.status(400).send(renderMessage('error', 'erro no email', 'O e-mail é obrigatório para excluir a conta.', '/settings'));
+    }
+    // Verifica se o e-mail enviado é o mesmo do usuário logado
+    if (email !== user) {
+        return res.status(403).send(renderMessage('error', 'Verifique o e-mail', 'O e-mail fornecido precisa ser o utilizado na conta', '/delete'));
     }
     try {
         await deleteUser(email);
-        res.send(`
-      <head>
-        <link rel="stylesheet" href="/styles.css">
-      </head>
-      <body>
-          <h2>Conta deletada com sucesso!</h2>
-          <p style="color: red;">Todos os seus dados foram permanentemente removidos.</p>
-          <a href="/">Voltar à Página Inicial</a>
-      </body>
-    `);
+        return res.status(200).send(renderMessage('success', 'Conta deletada com sucesso!', 'Todos os seus dados foram permanentemente removidos.', '/Login'));
     }
     catch (error) {
+        // Verifica se é um erro do Prisma (P2025: Registro não encontrado)
+        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+            return res.status(400).send(renderMessage('error', 'Verifique o e-mail', 'O e-mail fornecido precisa ser o utilizado na conta', '/delete'));
+        }
+        // Para demais erros inesperados
         res.status(500).send(error instanceof Error ? error.message : "Erro inesperado ao excluir a conta.");
     }
 }));
 // Rota de logout
-app.get('/logout', (req, res) => {
+app.get('/logout', isAuthenticated, (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             return res.status(500).send('Erro ao encerrar a sessão');
