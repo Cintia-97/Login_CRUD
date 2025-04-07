@@ -1,4 +1,3 @@
-/* Reset e Estilos Globais */
 * {
     margin: 0;
     padding: 0;
@@ -15,13 +14,11 @@ body {
     padding: 20px;
 }
 
-/* Container Principal */
 .container {
     width: 100%;
     max-width: 600px;
 }
 
-/* Card de Configurações */
 .card {
     background: white;
     border-radius: 15px;
@@ -200,9 +197,6 @@ body {
     }
 }
 
-/* ... (mantenha todo o CSS existente) ... */
-
-/* Botão Voltar */
 .back-button-container {
     padding: 0 30px 30px;
     text-align: left;
@@ -229,7 +223,7 @@ body {
     box-shadow: 0 5px 15px rgba(0, 143, 185, 0.1);
 }
 
-/* Responsivo */
+
 @media (max-width: 480px) {
     .back-button-container {
         padding: 0 15px 20px;
@@ -238,5 +232,53 @@ body {
     .btn-back {
         padding: 8px 12px;
         font-size: 0.9rem;
+    }
+}
+
+
+.readonly-field {
+    background-color: #f8f9fa;
+    color: #555;
+    cursor: not-allowed;
+}
+
+.hint {
+    color: #666;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 0.25rem;
+  }
+
+.readonly-field:focus {
+    border-color: #ddd !important;
+    box-shadow: none !important;
+}
+
+.input-container .readonly-field + .icon {
+    color: #aaa;
+}
+
+.form-group .input-container::after {
+    content: "Somente visualização";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    color: #999;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 2px 5px;
+    border-radius: 4px;
+    display: none;
+}
+
+.form-group .readonly-field ~ .input-container::after {
+    display: block;
+}
+
+@media (max-width: 480px) {
+    .form-group .input-container::after {
+        content: "Visualização";
+        font-size: 0.6rem;
     }
 }

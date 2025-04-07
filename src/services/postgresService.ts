@@ -16,19 +16,6 @@ export async function testConnection() {
 // Criar usuário
 export async function createUser(name: string, email: string, birthdate: string, password: string, verificationToken: string) {
   
-  /*
-  // Verifica se o usuário já existe
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  
-  //Verifica se o usuário existe no banco
-  if (existingUser) {
-    throw new Error("E-mail já cadastrado.");
-  }
-  
-  */
   // Hash da senha
   const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
@@ -104,11 +91,20 @@ export async function authenticateUser(email:string, password:string) {
 }
 
 // Atualizar usuário
-export async function updateUser(email:string, name: string, password: string) {
-  const hashedPassword = await bcrypt.hash(password, 10);
+export async function updateUser(email: string, name?: string, password?: string) {
+  const updateData: { name?: string; password?: string } = {};
+  
+  // Apenas adiciona ao objeto de atualização o que foi fornecido
+  if (name) updateData.name = name;
+  
+  if (password) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    updateData.password = hashedPassword;
+  }
+
   return await prisma.user.update({
     where: { email },
-    data: { name, password: hashedPassword }
+    data: updateData
   });
 }
 

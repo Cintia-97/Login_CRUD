@@ -6,6 +6,7 @@
     <title>Configurações do Usuário</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="settings.css">
+    
 </head>
 <body>
     <div class="container">
@@ -31,7 +32,7 @@
                         <label for="email">E-mail</label>
                         <div class="input-container">
                             <i class="fas fa-envelope icon"></i>
-                            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                            <input type="text" id="email" name="email" value="{{email}}" class="readonly-field" readonly>
                         </div>
                     </div>
                     
@@ -39,7 +40,7 @@
                         <label for="birthdate">Data de Nascimento</label>
                         <div class="input-container">
                             <i class="fas fa-calendar-alt icon"></i>
-                            <input type="date" id="birthdate" name="birthdate" required>
+                            <input type="text" id="birthdate" name="birthdate" value="{{birthdate}}" class="readonly-field" readonly>
                         </div>
                     </div>
                 </div>

@@ -52,8 +52,17 @@ app.use(session({
     secret: 'secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    cookie: { secure: false, // Defina como true se estiver usando HTTPS
+        maxAge: 24 * 60 * 60 * 1000, // 1 dia},
+        httpOnly: true
+    }
 }));
+app.use((req, _res, next) => {
+    if (!req.session) {
+        return next(new Error('Sessão não inicializada'));
+    }
+    next();
+});
 // Verifica se estamos em desenvolvimento
 const isDev = process.env.NODE_ENV !== 'production';
 if (isDev) {
@@ -326,14 +335,19 @@ app.post('/auth', (async (req, res) => {
             return res.status(403).send(renderMessage('error', 'Conta não verificada', 'Por favor, verifique seu e-mail para ativar sua conta', '/login'));
         }
         // Chama a função authenticateUser para buscar e verificar o usuário no banco de dados
-        const data = await authenticateUser(email, password);
-        // Define o usuário na sessão
+        await authenticateUser(email, password);
         req.session.user = {
-            name: data.name,
-            email: data.email,
+            name: user.name,
+            email: user.email,
+            birthdate: user.birthdate ? user.birthdate.toISOString() : '' // 
         };
-        // Se a autenticação for bem-sucedida, envia uma resposta de boas-vindas
-        res.send(renderTemplate('home.html'));
+        req.session.save(err => {
+            if (err) {
+                console.error('Erro ao salvar sessão:', err);
+                return res.status(500).send('Erro interno');
+            }
+            res.redirect('/principal');
+        });
     }
     catch (err) {
         console.error(err);
@@ -344,38 +358,77 @@ app.post('/auth', (async (req, res) => {
         return res.status(401).send(renderMessage('error', 'Falha no login', errorMessage, '/login'));
     }
 }));
+app.get('/test-session', (req, res) => {
+    console.log('Sessão atual:', req.session);
+    res.json({
+        session: req.session,
+        user: req.session.user
+    });
+});
 //Rota para exibir o formulário para atualizar os dados do usuário
 app.get('/settings', isAuthenticated, (async (req, res) => {
-    res.send(renderTemplate('settings.html'));
+    if (!req.session.user) {
+        console.log("mensagem de erro");
+        return res.redirect('/login');
+    }
+    // Formata a data apenas para exibição
+    const formattedBirthdate = req.session.user.birthdate
+        ? formatDateToDDMMAAAA(new Date(req.session.user.birthdate))
+        : '';
+    // Carrega o template e substitui os placeholders
+    let template = renderTemplate('settings.html');
+    template = template
+        .replace('{{name}}', req.session.user.name || '')
+        .replace('{{email}}', req.session.user.email || '')
+        .replace('{{birthdate}}', formattedBirthdate);
+    res.send(template);
 }));
+// Função auxiliar para formatar a data
+function formatDateToDDMMAAAA(date) {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+}
 //Rota para minha página principal
 app.get('/principal', isAuthenticated, (async (req, res) => {
     res.send(renderTemplate('home.html'));
 }));
 // Rota  para atualizar os dados do usuário
 app.post('/update', isAuthenticated, (async (req, res) => {
-    const { name, email, password, confirmPassword } = req.body;
-    if (!name || !email || !password || !confirmPassword) {
-        return res.status(400).send('Todos os campos são obrigatórios');
+    const { name, password, confirmPassword } = req.body;
+    const userEmail = req.session.user?.email;
+    // Validações básicas
+    if (!userEmail) {
+        return res.status(401).send(renderMessage('error', 'Não autorizado', 'Sessão inválida ou expirada', '/login'));
     }
-    if (!validator.isEmail(email)) {
-        return res.status(400).send('Formato inválido de e-mail');
+    // Valida se pelo menos um campo foi enviado para atualização
+    if (!name && !password) {
+        return res.status(400).send(renderMessage('error', 'Dados insuficientes', 'Informe pelo menos um campo para atualização (nome ou senha)', '/settings'));
     }
-    if (password !== confirmPassword) {
-        return res.status(400).send('As senhas não coincidem');
-    }
-    if (password.length <= 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-        return res.status(400).send(renderMessage('error', 'Senha fraca', 'A senha deve ter pelo menos 8 caracteres e conter pelo menos um caractere especial.', '/settings'));
+    // Validação específica para senha (se foi enviada)
+    if (password) {
+        if (password !== confirmPassword) {
+            return res.status(400).send(renderMessage('error', 'Senhas não coincidem', 'As senhas digitadas não são iguais', '/settings'));
+        }
+        if (password.length < 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            return res.status(400).send(renderMessage('error', 'Senha fraca', 'A senha deve ter pelo menos 8 caracteres e conter pelo menos um caractere especial.', '/settings'));
+        }
     }
     try {
-        await updateUser(email, name, password);
+        // Atualiza apenas os campos fornecidos
+        await updateUser(userEmail, name, password || undefined);
+        // Atualiza a sessão com o novo nome
+        if (req.session.user && name) {
+            req.session.user.name = name;
+        }
         return res.status(200).send(renderMessage('success', 'Dados atualizados', 'Seus dados foram atualizados com sucesso!', '/principal'));
     }
     catch (err) {
         if (err instanceof Error && err.message.includes("User not found")) {
             return res.status(404).send(renderMessage('error', 'Erro na atualização', err.message || 'Ocorreu um erro ao atualizar seus dados', '/settings'));
         }
-        res.status(500).send(err instanceof Error ? err.message : 'Erro inesperado');
+        res.status(500).send(renderMessage('error', 'Erro no servidor', 'Ocorreu um erro inesperado', '/settings'));
     }
 }));
 // Rota para exibir a confirmação de exclusão de conta
