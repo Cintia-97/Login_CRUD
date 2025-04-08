@@ -1,0 +1,98 @@
+:root {
+    --bg-color: #f5f8fa;
+    --text-color: #1c1e21;
+    --primary-dark: #008fb9;
+    --primary-light: #d1ecf9;
+  }
+  
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.7;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1.5rem 2rem;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 143, 185, 0.1);
+  }
+  
+  .termo-box h1.page-title {
+    font-size: 2rem;
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .intro {
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
+  }
+  
+  section {
+    margin-bottom: 2rem;
+  }
+  
+  h2 {
+    color: var(--primary-dark);
+    font-size: 1.25rem;
+    border-left: 4px solid var(--primary-light);
+    padding-left: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  ul {
+    padding-left: 1.5rem;
+    list-style-type: disc;
+  }
+
+  .form-group.terms {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: var(--text-color);
+  }
+  
+  .form-group.terms input[type="checkbox"] {
+    accent-color: #008fb9; /* cor do checkbox (moderna e suportada pelos principais navegadores) */
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    cursor: pointer;
+  }
+  
+  .form-group.terms label {
+    line-height: 1.4;
+  }
+  
+  .form-group.terms a {
+    color: #008fb9;
+    text-decoration: underline;
+    transition: color 0.3s;
+  }
+  
+  .form-group.terms a:hover {
+    color: #006d95;
+  }
+  
+  
+  @media (max-width: 600px) {
+    .container {
+      padding: 1rem;
+    }
+  
+    h1.page-title {
+      font-size: 1.6rem;
+    }
+  
+    h2 {
+      font-size: 1.1rem;
+    }
+  }
+  

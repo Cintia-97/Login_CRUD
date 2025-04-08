@@ -115,15 +115,21 @@ app.get('/', async (req, res) => {
 app.get('/register', async (req, res) => {
     res.send(renderTemplate('register.html'));
 });
+app.get('/termos', (req, res) => {
+    res.send(renderTemplate('termos.html'));
+});
 //Rota de Login do usuário
 app.get('/login', async (req, res) => {
     res.send(renderTemplate('login.html'));
 });
 //Para criar um novo usuário e chama a função de conexão com o banco de dados
 app.post('/users', (async (req, res) => {
-    const { name, email, birthdate, password, confirmPassword } = req.body;
+    const { name, email, birthdate, password, confirmPassword, terms } = req.body;
     if (!name || !email || !birthdate || !password || !confirmPassword) {
         return res.status(400).send(renderMessage('error', 'Campos obrigatórios', 'Todos os campos são obrigatórios', '/register'));
+    }
+    if (!terms) {
+        return res.send(renderMessage('error', 'Erro', 'Você precisa aceitar os Termos de Uso para criar uma conta.'));
     }
     if (!validator.isEmail(email)) {
         return res.status(400).send(renderMessage('error', 'E-mail inválido', 'O formato do e-mail é inválido', '/register'));

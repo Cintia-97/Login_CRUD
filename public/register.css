@@ -149,3 +149,13 @@ body {
         font-size: 0.8rem;
     }
 }
+
+.form-group.terms {
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.form-group.terms a {
+    color: #007BFF;
+    text-decoration: underline;
+}

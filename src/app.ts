@@ -148,6 +148,10 @@ app.get('/register', async (req: Request, res: Response) => {
   );
 });
 
+app.get('/termos', (req: Request, res: Response) => {
+  res.send(renderTemplate('termos.html'));
+});
+
 //Rota de Login do usuário
 app.get('/login', async (req: Request, res: Response) => {
   res.send(
@@ -157,7 +161,7 @@ app.get('/login', async (req: Request, res: Response) => {
 
 //Para criar um novo usuário e chama a função de conexão com o banco de dados
 app.post('/users', (async (req: Request, res: Response) => {
-  const { name, email, birthdate, password, confirmPassword } = req.body;
+  const { name, email, birthdate, password, confirmPassword, terms } = req.body;
 
   if (!name || !email || !birthdate || !password || !confirmPassword) {
     return res.status(400).send(renderMessage(
@@ -165,6 +169,14 @@ app.post('/users', (async (req: Request, res: Response) => {
       'Campos obrigatórios',
       'Todos os campos são obrigatórios',
       '/register'
+    ));
+  }
+
+  if (!terms) {
+    return res.send(renderMessage(
+      'error',
+      'Erro',
+      'Você precisa aceitar os Termos de Uso para criar uma conta.'
     ));
   }
 
