@@ -49,39 +49,6 @@
     padding-left: 1.5rem;
     list-style-type: disc;
   }
-
-  .form-group.terms {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-top: 1rem;
-    font-size: 0.95rem;
-    color: var(--text-color);
-  }
-  
-  .form-group.terms input[type="checkbox"] {
-    accent-color: #008fb9; /* cor do checkbox (moderna e suportada pelos principais navegadores) */
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    cursor: pointer;
-  }
-  
-  .form-group.terms label {
-    line-height: 1.4;
-  }
-  
-  .form-group.terms a {
-    color: #008fb9;
-    text-decoration: underline;
-    transition: color 0.3s;
-  }
-  
-  .form-group.terms a:hover {
-    color: #006d95;
-  }
-  
-  
   @media (max-width: 600px) {
     .container {
       padding: 1rem;
